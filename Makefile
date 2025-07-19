@@ -16,7 +16,7 @@ $(EXEC): $(OBJ)
 
 # Compiling
 %.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@ 
 
 # Clean up build files
 clean:

@@ -4,11 +4,29 @@
 #define Tdouble 0
 #define Tfloat 1
 
+// typedef union dIEEE {
+//     double x;
+//     struct{
+//         unsigned long long int f:52;
+//         unsigned long long int E:11;
+//         unsigned long long int s:1;
+//     }bits;
+// }dIEEE;
+
 typedef struct{
-    unsigned long long int f:52;
-    unsigned long long int E:11;
-    unsigned long long int s:1;
-} dIEEE;
+        unsigned long long int f:52;
+        unsigned long long int E:11;
+        unsigned long long int s:1;
+}dIEEE;
+
+// typedef union fIEEE{
+//     float x;
+//     struct {
+//         unsigned int f : 23;
+//         unsigned int E : 8;
+//         unsigned int s : 1;
+//     }bits;
+// }fIEEE;
 
 typedef struct {
     unsigned long int f:23;
@@ -27,12 +45,12 @@ real novo_real(double x, int t){
     if(t==Tdouble){
         double *pt_data;
         pt_data = (double *) malloc(sizeof(double));
-        *pt_data = x;
+        *pt_data = (double) x;
         r.data = (void *) pt_data;
     }else if(t==Tfloat){
         float *pt_data;
         pt_data = (float *) malloc(sizeof(float));
-        *pt_data = (float)x;
+        *pt_data = (float) x;
         r.data = (void *) pt_data;
     }
     return r;
@@ -40,6 +58,9 @@ real novo_real(double x, int t){
 
 void exclui_real(real *x){
     if(x->data!=NULL){
+
+        printf("exclui_real: data = %p\n", x->data);
+
         free(x->data);
         x->data=NULL;
     }
@@ -64,17 +85,35 @@ A função change_to_Tdouble deve converter o tipo de dado do valor real para Td
 Caso o o tipo de A não seja Tfloat, nada deve ser feito.
 */
     if (A->type == Tfloat) {
-        A->type = Tdouble;
+        double *pt_data = malloc(sizeof(double));
 
+        float x = * ((float *) A->data);
+        *pt_data = x;
+
+        exclui_real(A);
+        A->data = (void *) pt_data;
+        A->type = Tdouble;
     }
 
 }
- 
+
 void change_to_Tfloat(real *A){
 /*
 A função change_to_Tfloat deve converter o tipo de dado do valor real para Tfloat;
 Caso o tipo de A não seja Tdouble, nada deve ser feito.
 */
+    if (A->type == Tdouble) {
+        float *pt_data =  malloc(sizeof(float));
+
+        double x = * ((double *) A->data);
+        
+        *pt_data = x;
+
+        exclui_real(A);
+
+        A->data = (void *) pt_data;
+        A->type = Tfloat;
+    }
 }
 
 double real_to_double(real A){
@@ -98,11 +137,16 @@ A função real_to_float retorna um valor float a partir de um real;
     return * ((float*) A.data);
 }
 
+void printBinary(int *num, int tam) {
+    for (int i = sizeof(int) * tam / 4 - 1; i >= 0; i--) {
+        printf("%d", (*num >> i) & 1);
+    }
+}
 
 int main()
 {
-    double x = 13.125;
-
+    float x = 13.125;
+    x = 2;
     real r1, r2;
     r1 = novo_real(x, Tfloat);
     r2 = novo_real(x, Tdouble);
@@ -110,23 +154,39 @@ int main()
     fIEEE *as_float;
     dIEEE *as_double;
     
-    real sqrtR1 = sqrtNR(r1); // essa chamada da função deve retornar um valor real com type == Tfloat, pois r1.type == Tfloat 
-    real sqrtR2 = sqrtNR(r2); // essa chamada da função deve retornar um valor real com type == Tdouble, pois r2.type == Tdouble
+    // real sqrtR1 = sqrtNR(r1); // essa chamada da função deve retornar um valor real com type == Tfloat, pois r1.type == Tfloat 
+    // real sqrtR2 = sqrtNR(r2); // essa chamada da função deve retornar um valor real com type == Tdouble, pois r2.type == Tdouble
     
-    float sqrt_xF = real_to_float(sqrtR1);
-    double sqrt_xD = real_to_double(sqrtR2);
+    // float sqrt_xF =      real_to_float(sqrtR1);
+    // float sqrt_xD_to_F = real_to_float(sqrtR2);
+    // double sqrt_xD =     real_to_double(sqrtR2);
+    // double sqrt_xF_to_D =real_to_double(sqrtR1);
 
-    printf("float sqrt(%lf):%f\n",x,sqrt_xF);
-    printf("double sqrt(%lf):%lf\n",x,sqrt_xD);
-
+    // printf("f to f sqrt(%lf):%f\n",x,sqrt_xF);
+    // printf("d to f sqrt(%lf):%f\n",x,sqrt_xD_to_F);
+    // printf("d to d sqrt(%lf):%lf\n",x,sqrt_xD);
+    // printf("f to d sqrt(%lf):%lf\n",x,sqrt_xF_to_D);
+    
     as_float = (fIEEE*)r1.data;
     as_double = (dIEEE*)r2.data;
     
     printf("sinal:%x mantissa:%x expoente:%x\n",as_float->s, as_float->f, as_float->E);
     printf("sinal:%llx mantissa:%llx expoente:%llx\n",as_double->s, as_double->f, as_double->E);
     
-    exclui_real(&r1);
-    exclui_real(&r2);
+    // printf("r1: ");
+    // printBinary(r1.data, 32);    
+
+    // printf("r2:");
+    // printBinary(r2.data, 64);
+    // printf("mantissa:");
+    // printBinary(as_float->bits.f, 23);
+    
+    // printf("ok: %llx\n", r1.data);
+    
+    // printf("sinal:%x mantissa:%x expoente:%x\n",as_float->s, as_float->f, as_float->E);
+    // printf("sinal:%llx mantissa:%llx expoente:%llx\n",as_double->s, as_double->f, as_double->E);
+    // exclui_real(&r1);
+    // exclui_real(&r2);
 
     return 0;
 }
