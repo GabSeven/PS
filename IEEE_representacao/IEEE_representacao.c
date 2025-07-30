@@ -14,19 +14,10 @@
 // }dIEEE;
 
 typedef struct{
-        unsigned long long int f:52;
-        unsigned long long int E:11;
-        unsigned long long int s:1;
+    unsigned long long int f:52;
+    unsigned long long int E:11;
+    unsigned long long int s:1;
 }dIEEE;
-
-// typedef union fIEEE{
-//     float x;
-//     struct {
-//         unsigned int f : 23;
-//         unsigned int E : 8;
-//         unsigned int s : 1;
-//     }bits;
-// }fIEEE;
 
 typedef struct {
     unsigned long int f:23;
@@ -43,14 +34,25 @@ real novo_real(double x, int t){
     real r;
     r.type = t;
     if(t==Tdouble){
-        double *pt_data;
-        pt_data = (double *) malloc(sizeof(double));
-        *pt_data = (double) x;
+        dIEEE *pt_data;
+        pt_data = (dIEEE *) malloc(sizeof(dIEEE));
+        
+        unsigned long long int *px = (unsigned long long int *)&x;
+        pt_data->f = (*px) & 0xFFFFFFFFFFFFF; // 52
+        pt_data->E = ((*px) >> 52) & 0x7FF;  // 0b111 1111 1111 => 11
+        pt_data->s = ((*px) >> (52 + 11)) & 0x1;
         r.data = (void *) pt_data;
     }else if(t==Tfloat){
-        float *pt_data;
-        pt_data = (float *) malloc(sizeof(float));
-        *pt_data = (float) x;
+
+        fIEEE *pt_data;
+        pt_data = (fIEEE *) malloc(sizeof(fIEEE));
+
+        float y = x;
+        
+        unsigned long int *px = (unsigned long int *)&y;
+        pt_data->f = (*px) & 0x7FFFFF; // 23
+        pt_data->E = ((*px) >> 23) & 0xFF; // 0b1111 1111 => 8
+        pt_data->s = ((*px) >> (23 + 8)) & 0x1;
         r.data = (void *) pt_data;
     }
     return r;
@@ -145,8 +147,8 @@ void printBinary(int *num, int tam) {
 
 int main()
 {
-    float x = 13.125;
-    x = 2;
+    float x = 256;
+    // 01010
     real r1, r2;
     r1 = novo_real(x, Tfloat);
     r2 = novo_real(x, Tdouble);
@@ -167,12 +169,17 @@ int main()
     // printf("d to d sqrt(%lf):%lf\n",x,sqrt_xD);
     // printf("f to d sqrt(%lf):%lf\n",x,sqrt_xF_to_D);
     
-    as_float = (fIEEE*)r1.data;
-    as_double = (dIEEE*)r2.data;
+    as_float = r1.data;
+    as_double = r2.data;
     
-    printf("sinal:%x mantissa:%x expoente:%x\n",as_float->s, as_float->f, as_float->E);
-    printf("sinal:%llx mantissa:%llx expoente:%llx\n",as_double->s, as_double->f, as_double->E);
-    
+    printf("sinal:%x mantissa:%x expoente:%x\n", as_float->s, as_float->f, as_float->E - 127);
+    printf("sinal:%x mantissa:%lx expoente:%x\n",as_double->s, as_double->f, as_double->E - 1023);
+    float f = real_to_float(r1);
+    printf("teste: %fz", f);
+
+    double d = real_to_double(r2);
+    printf("double: %lf\n", d); 
+
     // printf("r1: ");
     // printBinary(r1.data, 32);    
 
