@@ -69,7 +69,6 @@ void exclui_real(real *x){
 }
 
 
-real sqrtNR(real A){
 /*
 A função sqrtNR recebe um valor real e retorna o valor real da raiz quadrada de A calculado 
 com o método de Newton Raphson. 
@@ -78,6 +77,57 @@ A função deve analisar se o valor A é representado como Tfloat ou Tdouble.
     - Caso o tipo de A seja Tdouble, o retorno deverá ser do tipo Tdouble
 Se o tipo não for Tdouble nem Tfloat, o comportamento é indefinido (ou seja, não se sabe o que será retornado) 
 */
+
+real sqrtNR(real A){
+    if (A.type ==  Tfloat) {
+        printf("bbb\n");
+        if (*(float *) A.data == 0 || *(float *) A.data == 1) {
+            return A;
+        } else {
+            // *(float *) A.data = 2;
+        
+            const int B = 127; //valor do bias para float
+            const double sqrt2 =  1.4142135623730950488016887;
+            int k = 0;
+
+            fIEEE x0 , x1;
+            
+            x0 = *(fIEEE*) A.data;
+            int impar = !(x0.E & 1); /// expoente verdadeiro � �mpar???
+            x0.E = ((x0.E>>1) + 0x3F ); /// cuidado com o double
+            x0.f >>= 1; /// metade da fra��o da mantissa
+            if (impar) {
+                // x0 = (fIEEE)  (((float) x0) * sqrt2) ;
+            }
+
+            // return * ((float*) A.data);
+        //     printf("\n  E  = %d ", x0.bits.E);
+        //     printf("\n  f  = %d ", x0.bits.f);
+        //     printf("\n  f  = %f ", (float)x0.bits.f/(1<<23));
+        //     printf("\n  s  = %d ", x0.bits.s);
+
+
+        //     printf("\n  Estimativa Inicial x0.x  = %f  ", x0.x );
+
+        //     x1.x = x0.x;
+
+        //     do { /// newton-rapson   /// dessa maneira, se X.x0 == 0.0
+        //                             /// temos problemas em usar while-do
+        //             x0.x = x1.x; /// estimativa atual
+        //             x1.x = (x0.x + A/x0.x); /// pr�xima estimativa
+        // /// resolver a multiplica��o por (1/2)
+        //             x1.bits.E--; /// x1.bits.E = x1.bits.E � 1;
+        //             k++;  /// contador de itera��es
+        //     } while (x0.x != x1.x);
+        //     printf("\n  Total de iteracoes  = %d ", k );
+        //     return x1.x;'
+        
+        }
+                
+    } else if (A.type == Tdouble) {
+        printf("");
+    }
+    
     return A; // Cuidado com esse retorno, pois A.data é uma região de memória que não faz parte da struct
 }
 
@@ -147,7 +197,7 @@ void printBinary(int *num, int tam) {
 
 int main()
 {
-    float x = 256;
+    float x = 3;
     // 01010
     real r1, r2;
     r1 = novo_real(x, Tfloat);
@@ -156,15 +206,15 @@ int main()
     fIEEE *as_float;
     dIEEE *as_double;
     
-    // real sqrtR1 = sqrtNR(r1); // essa chamada da função deve retornar um valor real com type == Tfloat, pois r1.type == Tfloat 
+    real sqrtR1 = sqrtNR(r1); // essa chamada da função deve retornar um valor real com type == Tfloat, pois r1.type == Tfloat 
     // real sqrtR2 = sqrtNR(r2); // essa chamada da função deve retornar um valor real com type == Tdouble, pois r2.type == Tdouble
     
-    // float sqrt_xF =      real_to_float(sqrtR1);
+    float sqrt_xF =      real_to_float(sqrtR1);
     // float sqrt_xD_to_F = real_to_float(sqrtR2);
     // double sqrt_xD =     real_to_double(sqrtR2);
     // double sqrt_xF_to_D =real_to_double(sqrtR1);
 
-    // printf("f to f sqrt(%lf):%f\n",x,sqrt_xF);
+    printf("f to f sqrt(%lf):%f\n",x,sqrt_xF);
     // printf("d to f sqrt(%lf):%f\n",x,sqrt_xD_to_F);
     // printf("d to d sqrt(%lf):%lf\n",x,sqrt_xD);
     // printf("f to d sqrt(%lf):%lf\n",x,sqrt_xF_to_D);
@@ -172,8 +222,8 @@ int main()
     as_float = r1.data;
     as_double = r2.data;
     
-    printf("sinal:%x mantissa:%x expoente:%x\n", as_float->s, as_float->f, as_float->E - 127);
-    printf("sinal:%x mantissa:%lx expoente:%x\n",as_double->s, as_double->f, as_double->E - 1023);
+    printf("sinal:%lx mantissa:%lx expoente:%lx\n", (long int) as_float->s, (long int) as_float->f, (long int) as_float->E - 127);
+    printf("sinal:%llx mantissa:%llx expoente:%llx\n", (long long int) as_double->s,  (long long int)as_double->f,  (long long int)as_double->E - 1023);
     float f = real_to_float(r1);
     printf("teste: %fz", f);
 
