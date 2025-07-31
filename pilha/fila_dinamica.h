@@ -10,8 +10,8 @@ Implementação da fila:
 
 */
 
-#ifndef __FILA_H__
-#define __FILA_H__
+#ifndef __FILA_DINAMICA_H__
+#define __FILA_DINAMICA_H__
 
 
 /*
@@ -21,9 +21,14 @@ Implementação da fila:
 	Deve se substituir a linha 16 deste arquivo pela declaração dos dados
 	a serem usados.
 */
+typedef struct {
+    int linha;
+    int coluna;
+    int rotulo;
+} Pixel;
 
 struct no_fila{
-	int dado;
+	Pixel dado;
 	struct no_fila *prox;
 };
 
@@ -43,20 +48,9 @@ int fila_vazia(struct fila *f);
 
 /*Insere d no final da fila. Retorna 1 se foi possível inserir, 0 caso contrário
 Não se esqueça de laterar o tipo de dado a ser inserido na fila*/
-int enfilera(struct fila *f, int d);
+int enfilera(struct fila *f, Pixel d);
 
 /*Remove o primeiro da fila. Retorna 1 se foi possível remover, 0 caso contrário*/
 int desenfilera(struct fila *f);
-
-/*Obtém os dados do primeiro elemento da fila e amazena em ret.
-Além disso, a função retorna 1 quando conseguiu obter o primeiro, ou 0 quando não foi
-possível obter o primeiro elemento (fila vazia) */
-int primeiro(struct fila *f, int *ret);
-
-/*verifica se o valor v está presente no campo dado de algum nó da fila*/
-int busca_fila(struct fila *f, int v);
-
-/*imprime o conteúdo da fila com o valor mais a esquerda sendo o primeiro da fila*/
-void escreve_fila(struct fila *f);
 
 #endif
