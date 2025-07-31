@@ -15,7 +15,7 @@ void inicializa_fila_hierarquica(struct fila_hierarquica *fh);
 
 // Insere um elemento na fila do nível de prioridade especificado
 // Retorna 1 se inseriu com sucesso, 0 caso contrário
-int enfilera_fh(struct fila_hierarquica *fh, int dado, int prioridade);
+int enfilera_fh(struct fila_hierarquica *fh, Pixel dado, int prioridade);
 
 // Remove o elemento de maior prioridade da fila hierárquica
 // Retorna 1 se removeu algo, 0 se está vazia
