@@ -51,7 +51,7 @@ int desenfilera(struct fila *f);
 /*Obtém os dados do primeiro elemento da fila e amazena em ret.
 Além disso, a função retorna 1 quando conseguiu obter o primeiro, ou 0 quando não foi
 possível obter o primeiro elemento (fila vazia) */
-int priemiro(struct fila *f, int *ret);
+int primeiro(struct fila *f, int *ret);
 
 /*verifica se o valor v está presente no campo dado de algum nó da fila*/
 int busca_fila(struct fila *f, int v);

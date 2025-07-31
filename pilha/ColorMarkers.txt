@@ -1,0 +1,12 @@
+7
+430 300 1
+450 335 1
+300 190 2
+455 107 3
+760 620 4
+800 300 255
+490 240 255
+
+lin col label
+// 1 marcador por linha
+// total de marcadores na primeira linha
