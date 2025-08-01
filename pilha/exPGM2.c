@@ -480,7 +480,6 @@ TPpgm Watershed(TPpgm *grad, int* M, int tm) {
     }
     escreve_fila_hierarquica(&fh);
 
-    int hm= 0;
     while (!fila_hierarquica_vazia(&fh)) {
         // escreve_fila_hierarquica(&fh);
         Pixel px = desenfileira_fh(&fh);
@@ -491,18 +490,17 @@ TPpgm Watershed(TPpgm *grad, int* M, int tm) {
                     continue;
                 if ((0 <= i + px.linha) && (i + px.linha < Ws.h) && // a linha esta dentro da imagem
                 (0 <= j + px.coluna) && (j + px.coluna < Ws.w) && // a coluna esta dentro da imagem
-                Ws.pix[(px.linha +i) * Ws.w + (px.coluna + j)] == 0) { // o rotulo nao foi marcado ainda
+                Ws.pix[(px.linha +i) * Ws.w + (px.coluna + j)] == 0) { // o rotulo ja nao foi marcado
 
                     Pixel mv = (Pixel) {i + px.linha, j + px.coluna, px.rotulo};
                     if (enfileira_fh(&fh, mv, grad->pix[(px.linha +i) * Ws.w + (px.coluna + j)])) {
                         Ws.pix[(px.linha +i) * Ws.w + (px.coluna + j)] = px.rotulo; // v.rotulo = Pix.rotulo
-                    hm++;
                     }
                 }
             }
         }
     }
-    printf("CARALHOOO: %d\n", hm);
+
     return Ws;
 }
 

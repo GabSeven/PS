@@ -1,12 +1,33 @@
-7
+10
 430 300 1
 450 335 1
 300 190 2
-455 107 3
-760 620 4
+455 620 3
+725 620 4
+200 600 1
+270 900 3
+470 750 1
 800 300 255
 490 240 255
 
 lin col label
 // 1 marcador por linha
 // total de marcadores na primeira linha
+
+
+
+
+
+
+800 300 255
+490 240 255
+xicara: 430 300 1
+xicara: 450 335 1
+logo cafe: 300 190 2
+cha: 455 620 3
+bolacha: 725 620 4
+mouse: 200 600 1
+grampeador: 270 900
+tampinha: 470 750 1
+folha externa:630 830 3
+folha interna: 630 850 3
