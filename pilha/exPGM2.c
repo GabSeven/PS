@@ -28,15 +28,7 @@ void ReadPGM(const char *fname, TPpgm *img) {
        }
     printf("\n ..... (Abriu ARQUIVO )-->%s.", fname);
     fscanf (fd, "%s\n", img->tipo); /// vetor de char � ponteiro
-    /// se existir comentario (#......)
-    /// char C[256]; fscanf (fd, "%s", C); // leia a segunda linha
-    ///
-    ///   while (C[0] == '#') {   // se no cabe�alho do arquivo existe uma linha de coment�rio,
-    ///      fgets (C, 255, fd);  // ela come�a com o char "#".
-    ///      fscanf (fd, "%s", C); // Pular essa linha (ela � irrelevante)
-    ///    }
-    ///    sscanf (C, "%d", &img->w);
-    ///    fscanf (fd, "%d\n", &img->h); /// comentar as duas pr�ximas linhas
+    
     fscanf (fd, "%d\n", &img->w); /// largura da imagem
     fscanf (fd, "%d\n", &img->h); /// altura da imagem
 
@@ -44,7 +36,7 @@ void ReadPGM(const char *fname, TPpgm *img) {
         fscanf (fd, "%d\n", &img->max); /// valor de brilho m�ximo na imagem
     }
 
-//printf("\n == 'P1' ==> %d", strcmp("P1", "P3"));
+    
      /// se a imagem � bin�ria (P1) ou em escala de cinza (P2)
     img->pixlen = 1*(img->w * img->h); //cada pixel tem 1 componente (valor de brilho)
 
@@ -427,22 +419,22 @@ void RegionColorMarkers(TPpgm *f, TPpgm *mk, TPpgm *cm){
             // recupere a cor RGB associada com esse r�tulo
                 switch (lbl) {
                     case 1: // se o r�tulo � 1
-                        rr=255; gg=0; bb=0; // vermelho
+                        rr=255; gg=255; bb=255; // vermelho
                         break;
                     case 2: // se o r�tulo � 2
-                        rr=0; gg=255; bb=0;  // verde
+                        rr=1; gg=1; bb=1;  // verde
                         break;
                     case 3:
-                        rr=0; gg=0; bb=255; // azul
+                        rr=2; gg=2; bb=2; // azul
                         break;
                     case 4:
                         rr=255; gg=127; bb=0; ///??????
                         break;
                     case 5:
-                        rr=255; gg=255; bb=255; //branco
+                        rr=3; gg=3; bb=3; //branco
                         break;
                     case 6:
-                        rr=127; gg=127; bb=127; //cinza m�dio
+                        rr=4; gg=4; bb=4; //cinza m�dio
                     break;
 
                     default:  // otherwise
@@ -459,33 +451,26 @@ void RegionColorMarkers(TPpgm *f, TPpgm *mk, TPpgm *cm){
 
 } // RegionColorMarkers
 
-// typedef struct TPpgm { /// descritor para imagens tipo PGM
-//       char tipo[3]; /// "P1", "P2", "P3"
-//       int w;     // largura da imagem em pixels (TC - Total de pixels em cada coluna da imagem)
-//       int h;     // altura da imagem em pixel   (TL - Total de pixels em cada linha da imagem )
-//       int max;   // valor de brilho m�ximo registrado na imagem (use 255 sempre)
-//       int pixlen;   // total de pixels (em todas as bandas) da imagem
-//       Tpixel *pix; // ponteiro para o reticulado (matriz) da imagem alocada como um vetor.
-//     } TPpgm;
 
 /// color "P3", cinza "P2" ou binario "P1"
 TPpgm Watershed(TPpgm *grad, TPpgm *img, int* M, int tm) {
     FilaH fh; 
     inicializa_fila_hierarquica(&fh); 
-
+    
     TPpgm Ws;
+    Ws = *img;
     Ws.h = img->h; // altura
     Ws.w = img->w; // largura
     Ws.max = 255;
-    Ws.tipo[0] = (char)"P";
-    Ws.tipo[1] =  (char)"1";
-    Ws.tipo[2] =  (char)"";
+    // Ws.tipo[0] =  'P';
+    Ws.tipo[1] =  '2';
+    // Ws.tipo[2] =  ' ';
     Ws.pixlen = Ws.h * Ws.w;
     Ws.pix = (Tpixel*)malloc(sizeof(Tpixel) * (Ws.pixlen));
     
     // Inicializa
-    for (int i = 0; i <= Ws.h; i++) {
-        for (int j = 0; j <= Ws.w; j++) {
+    for (int i = 0; i < Ws.h; i++) {  
+        for (int j = 0; j < Ws.w; j++) {
             Ws.pix[j + i * Ws.w] = 0;
         } 
     }
@@ -500,7 +485,7 @@ TPpgm Watershed(TPpgm *grad, TPpgm *img, int* M, int tm) {
         int c = M[i + 1];
         int rotulo = M[i + 2];
 
-        enfileira_fh(&fh, (Pixel) {l, c, rotulo}, grad->pix[l* Ws.w + c]);
+        enfileira_fh(&fh, (Pixel) {l, c, rotulo}, img->pix[l* Ws.w + c]);
     }
 
     
@@ -509,15 +494,18 @@ TPpgm Watershed(TPpgm *grad, TPpgm *img, int* M, int tm) {
     while (!fila_hierarquica_vazia(&fh)) {
         // escreve_fila_hierarquica(&fh);
         Pixel px = desenfileira_fh(&fh);
-        Ws.pix[px.coluna + px.linha * Ws.w] = px.rotulo;
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++){
-                if (0 < i + px.linha && i + px.linha < Ws.h &&
-                0 < j + px.coluna && j + px.coluna < Ws.w && 
-                i != 0 && j != 0 && Ws.pix[(px.linha +i) * Ws.w + (px.coluna + j)] == 0) {
+        Ws.pix[px.linha * Ws.w + px.coluna ] = px.rotulo;
+        for (int i = -1; i < 2; i++) {
+            for (int j = -1; j < 2; j++){
+                if (0 <= i + px.linha && i + px.linha < Ws.h &&
+                0 <= j + px.coluna && j + px.coluna < Ws.w && 
+                !(i == 0 & j == 0) && Ws.pix[(px.linha +i) * Ws.w + (px.coluna + j)] == 0) {
+
+
+                    
                     Pixel mv = (Pixel) {i + px.linha, j + px.coluna, px.rotulo};
-                    Ws.pix[j + i * Ws.w] = px.rotulo; // v.rotulo = Pix.rotulo
-                    enfileira_fh(&fh, mv, grad->pix[j + i * Ws.w]);
+                    Ws.pix[(px.linha +i) * Ws.w + (px.coluna + j)] = px.rotulo; // v.rotulo = Pix.rotulo
+                    enfileira_fh(&fh, mv, img->pix[(px.linha +i) * Ws.w + (px.coluna + j)]);
                 }
             }
         }
@@ -571,6 +559,7 @@ int main(int argc, char *argv[]){
     ReadPGM(NimgO, &imgO);
 
     RGB2Gray(&imgO, &imgG);
+    
 
     ViewColorMarkers(&imgG, &imgMK, M, tm);
 
@@ -582,10 +571,10 @@ int main(int argc, char *argv[]){
     WritePGM(NimgGrad, &grad);
     
     
-    imgWS = Watershed(&grad, &imgG, M, tm); /// aplica o algoritmo de Watershed
     
-    WritePGM(WsImage, &imgWS);
-
+    // RegionColorMarkers(&imgO, &imgWS, &imgWS);
+    
+    
     /// exemplo para usar RegionColorMarkers
     TPpgm mkr, gmkr; /// mkr - imagem dos marcadores   gmkr - imagem do grad. dos marcadores
     // TPpgm colormk; /// imagem apresentando os marcadores coloridos
@@ -605,13 +594,14 @@ int main(int argc, char *argv[]){
     const char* NimgTesteGrad = "imgTesteGrad.pgm";
 
     ReadPGM(NimgTeste,&imgTeste);
-
+    
     //mudando fundo de branco (255) para preto (0)
     for(int i=0;i<imgTeste.pixlen; i++){
         if(imgTeste.pix[i] == 255)
-            imgTeste.pix[i] = 0;
+        imgTeste.pix[i] = 0;
     }
-
+    
+    
     morphgrad(&imgTeste,&imgTesteGrad);
     RegionColorMarkers(&imgTeste, &imgTesteGrad, &BorderColor);
     RegionColorMarkers(&imgTeste, &imgTeste, &RegionColor);
@@ -637,7 +627,9 @@ int main(int argc, char *argv[]){
     //WritePGM(imgBordermkr, &Bcolormk);
     //WritePGM(NArea, &AreaColor);
     ///
-
+    imgWS = Watershed(&grad, &imgG, M, tm); /// aplica o algoritmo de Watershed
+    WritePGM(WsImage, &imgWS);
+    
 
 
     free(imgO.pix);
