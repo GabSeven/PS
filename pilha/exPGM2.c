@@ -525,7 +525,7 @@ int main(int argc, char *argv[]){
     }
 
 
-    TPpgm imgO, inv, dil, ero, imgG, grad, imgMK, imgWS, imgS;
+    TPpgm imgO, inv, dil, ero, imgG, grad, imgMK, imgWS, imgS, imgWSBoard;
 
 
     ReadPGM(NimgO, &imgO);
@@ -544,8 +544,9 @@ int main(int argc, char *argv[]){
     
     
     imgWS = Watershed(&grad, M, tm); /// aplica o algoritmo de Watershed
+    morphgrad(&imgWS, &imgWSBoard);
     
-    RegionColorMarkers(&imgO, &imgWS, &imgS);
+    RegionColorMarkers(&imgO, &imgWSBoard, &imgS);
     WritePGM(WsImage, &imgWS);
     WritePGM(SImage, &imgS);
     
@@ -612,7 +613,7 @@ int main(int argc, char *argv[]){
     // free(ero.pix);
     free(grad.pix);
     //   free(imgR);
-
+    free(imgWSBoard.pix);
     /// liberando imagens do exemplo de uso dos marcadores
     //free(mkr.pix);
     //free(colormk.pix); /// regi�es coloridas
