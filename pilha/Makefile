@@ -2,7 +2,7 @@ CC = gcc
 CFLAGS = -Wall -Wextra -g
 
 # Fontes
-SRCS = teste.c fila_dinamica.c fila_hierarquica.c
+SRCS = fila_dinamica.c fila_hierarquica.c exPGM2.c
 HEADERS = fila_dinamica.h fila_hierarquica.h
 OBJS = $(SRCS:.c=.o)
 

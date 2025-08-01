@@ -48,9 +48,11 @@ int fila_vazia(struct fila *f);
 
 /*Insere d no final da fila. Retorna 1 se foi possível inserir, 0 caso contrário
 Não se esqueça de laterar o tipo de dado a ser inserido na fila*/
-int enfilera(struct fila *f, Pixel d);
+int enfileira(struct fila *f, Pixel d);
 
 /*Remove o primeiro da fila. Retorna 1 se foi possível remover, 0 caso contrário*/
-int desenfilera(struct fila *f);
+int desenfileira(struct fila *f);
 
+/*imprime o conteúdo da fila com o valor mais a esquerda sendo o primeiro da fila*/
+void escreve_fila(struct fila *f);
 #endif

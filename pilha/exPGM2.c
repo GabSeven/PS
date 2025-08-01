@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <string.h>  // para usar a fun��o strcmp() que compara duas strings
 #include <stdlib.h>  // para usar a fun��o exit() que interrompe (aborta) a execu��o do programa.
+#include "fila_hierarquica.h"
+
+typedef struct fila_hierarquica FilaH;
 
 typedef unsigned char Tpixel; // tipo Tpixel para valores em [0, 255]
 
@@ -16,14 +19,14 @@ typedef struct TPpgm { /// descritor para imagens tipo PGM
 void ReadPGM(const char *fname, TPpgm *img) {
     FILE *fd;   /// img->tipo
 
-printf("\n ..... (Abrindo ARQUIVO )-->%s.", fname);
+    printf("\n ..... (Abrindo ARQUIVO )-->%s.", fname);
     fd = fopen(fname, "r");  // modo "r" --> abrir somente para leitura
        if (!fd) {
-         printf("\n ERRO: Incapaz de abrir arquivo: %s.\n\n", fname);
-         exit(1);  // ERRO 1: arquivo inexistente ou n�o encontrado no caminho especificado.
+        printf("\n ERRO: Incapaz de abrir arquivo: %s.\n\n", fname);
+        exit(1);  // ERRO 1: arquivo inexistente ou n�o encontrado no caminho especificado.
          // encerra a execu��o do programa e fecha todos os arquivos abertos
        }
-printf("\n ..... (Abriu ARQUIVO )-->%s.", fname);
+    printf("\n ..... (Abriu ARQUIVO )-->%s.", fname);
     fscanf (fd, "%s\n", img->tipo); /// vetor de char � ponteiro
     /// se existir comentario (#......)
     /// char C[256]; fscanf (fd, "%s", C); // leia a segunda linha
@@ -48,53 +51,53 @@ printf("\n ..... (Abriu ARQUIVO )-->%s.", fname);
     if (((strcmp(img->tipo, "P3")) == 0)) { ///se a imagem � colorida
         img->pixlen = 3*(img->w * img->h); //cada pixel tem 3 componentes (R,G,B)
     }
-printf("\n ..... (Total de pixels --> %d.", img->pixlen);
-printf("\n ..... (Leu Cabecalho )-->%s.", fname);
+    printf("\n ..... (Total de pixels --> %d.", img->pixlen);
+    printf("\n ..... (Leu Cabecalho )-->%s.", fname);
     int paux;
     img->pix = (Tpixel*)malloc(sizeof(Tpixel) * (img->pixlen));
-     if (!img->pix) {
+    if (!img->pix) {
         printf("\n vetor de pixels nao alocado ....");
         exit(1);
      }
 
-     for (int k=0; k<img->pixlen; k++){
-         fscanf (fd, "%d", &paux);
-         img->pix[k] = (Tpixel) paux; /// fscanf (fd, "%d ", *(p + k));
+    for (int k=0; k<img->pixlen; k++){
+        fscanf (fd, "%d", &paux);
+        img->pix[k] = (Tpixel) paux; /// fscanf (fd, "%d ", *(p + k));
        }
-printf("\n ..... (Leu ARQUIVO )-->%s.", fname);
-   fclose(fd);
+    printf("\n ..... (Leu ARQUIVO )-->%s.", fname);
+    fclose(fd);
 } /// readpgm
 
-void WritePGM(const char *fname, TPpgm *img) {
+void WritePGM(const char *fname, TPpgm *img) { 
+    printf("\nAbriu");
+    FILE *fd;
 
-        FILE *fd;
+    fd = fopen(fname, "w");  /// modo "w" --> abrir para escrita
+    if (!fd) {
+        printf("\n ERRO: Incapaz de abrir arquivo: %s.", fname);
+        exit(1);  // algum c�digo de erro - Arquivo nao existe.
+    }
+    printf("\n ..... (ARQUIVO Aberto)-->%s.", fname);
 
-        fd = fopen(fname, "w");  /// modo "w" --> abrir para escrita
-        if (!fd) {
-            printf("\n ERRO: Incapaz de abrir arquivo: %s.", fname);
-            exit(1);  // algum c�digo de erro - Arquivo nao existe.
-        }
-printf("\n ..... (ARQUIVO Aberto)-->%s.", fname);
+    ///gravar no arquivo o cabe�alho de imagens PGM cinza
 
-        ///gravar no arquivo o cabe�alho de imagens PGM cinza
+    fprintf(fd, "%s\n", img->tipo); ///  assinatura PGM:
+            /// color "P3", cinza "P2" ou binario "P1"
+    fprintf(fd,"%d %d\n", img->w, img->h);
 
-        fprintf(fd, "%s\n", img->tipo); ///  assinatura PGM:
-                /// color "P3", cinza "P2" ou binario "P1"
-        fprintf(fd,"%d %d\n", img->w, img->h);
+    if (strcmp(img->tipo, "P1") != 0) {/// a imagem n�o � bin�ria?
+                            /// Se sim, gravar o valor m�ximo poss�vel
+            fprintf(fd,"%d\n", 255); // valor de brilho m�ximo na imagem (use sempre 255
+    }
 
-        if (strcmp(img->tipo, "P1") != 0) {/// a imagem n�o � bin�ria?
-                                /// Se sim, gravar o valor m�ximo poss�vel
-             fprintf(fd,"%d\n", 255); // valor de brilho m�ximo na imagem (use sempre 255
-        }
+    /// gravar no arquivo os valores dos pixels da imagem computada
+    for (unsigned int k = 0; k < img->pixlen; k++) {
+        fprintf(fd,"%d ", img->pix[k]); // o mesmo que (*((img->pix) + k))
+    }
 
-        /// gravar no arquivo os valores dos pixels da imagem computada
-        for (unsigned int k = 0; k < img->pixlen; k++) {
-            fprintf(fd,"%d ", img->pix[k]); // o mesmo que (*((img->pix) + k))
-        }
+    fclose(fd);
 
-        fclose(fd);
-
-        printf("\n ..... (ARQUIVO GRAVADO)-->%s.", fname);
+    printf("\n ..... (ARQUIVO GRAVADO)-->%s.", fname);
 
 }
 
@@ -318,12 +321,11 @@ fd = fopen(fname, "r");  /// modo "r" --> abrir para ler
 printf("\n ..... (ARQUIVO Aberto)-->%s\n.", fname);
 
    fscanf(fd, "%d \n", tm); // quantidade de marcadores
-printf("%d \n", *tm); // quantidade de marcadores
-   int p1, p2, p3;
-   int *M = (int*)malloc(3*sizeof(int)*(*tm));
-   for (int k=0; k<(*tm)*3; k += 3){
-     fscanf(fd, "%d %d %d",&M[k], &M[k+1], &M[k+2]);
-  ///    printf("%d %d %d \n",M[k], M[k+1], M[k+2]);
+    printf("QUANTIDADE DE MARCADORES: %d \n", *tm); // quantidade de marcadores
+    int p1, p2, p3;
+    int *M = (int*)malloc(3*sizeof(int)*(*tm));
+    for (int k=0; k<(*tm)*3; k += 3){
+        fscanf(fd, "%d %d %d",&M[k], &M[k+1], &M[k+2]);
    }
    fclose (fd);
    return M;
@@ -457,19 +459,103 @@ void RegionColorMarkers(TPpgm *f, TPpgm *mk, TPpgm *cm){
 
 } // RegionColorMarkers
 
+// typedef struct TPpgm { /// descritor para imagens tipo PGM
+//       char tipo[3]; /// "P1", "P2", "P3"
+//       int w;     // largura da imagem em pixels (TC - Total de pixels em cada coluna da imagem)
+//       int h;     // altura da imagem em pixel   (TL - Total de pixels em cada linha da imagem )
+//       int max;   // valor de brilho m�ximo registrado na imagem (use 255 sempre)
+//       int pixlen;   // total de pixels (em todas as bandas) da imagem
+//       Tpixel *pix; // ponteiro para o reticulado (matriz) da imagem alocada como um vetor.
+//     } TPpgm;
+
+/// color "P3", cinza "P2" ou binario "P1"
+TPpgm Watershed(TPpgm *grad, TPpgm *img, int* M, int tm) {
+    FilaH fh; 
+    inicializa_fila_hierarquica(&fh); 
+
+    TPpgm Ws;
+    Ws.h = img->h; // altura
+    Ws.w = img->w; // largura
+    Ws.max = 255;
+    Ws.tipo[0] = (char)"P";
+    Ws.tipo[1] =  (char)"1";
+    Ws.tipo[2] =  (char)"";
+    Ws.pixlen = Ws.h * Ws.w;
+    Ws.pix = (Tpixel*)malloc(sizeof(Tpixel) * (Ws.pixlen));
+    
+    // Inicializa
+    for (int i = 0; i <= Ws.h; i++) {
+        for (int j = 0; j <= Ws.w; j++) {
+            Ws.pix[j + i * Ws.w] = 0;
+        } 
+    }
+    
+    // for (int i = 0; i < tm; i ++){
+    //     printf("{%d, %d, %d}\n", M[i], M[i + 1], M[i + 2]);
+    // }
+
+    for (int i = 0; i < tm * 3; i+= 3) { // mandar pra fila
+        // M  i  j  prioridade
+        int l = M[i];
+        int c = M[i + 1];
+        int rotulo = M[i + 2];
+
+        enfileira_fh(&fh, (Pixel) {l, c, rotulo}, grad->pix[l* Ws.w + c]);
+    }
+
+    
+    // K = *((img->pix) + L*img->w + C);
+    
+    while (!fila_hierarquica_vazia(&fh)) {
+        // escreve_fila_hierarquica(&fh);
+        Pixel px = desenfileira_fh(&fh);
+        Ws.pix[px.coluna + px.linha * Ws.w] = px.rotulo;
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++){
+                if (0 < i + px.linha && i + px.linha < Ws.h &&
+                0 < j + px.coluna && j + px.coluna < Ws.w && 
+                i != 0 && j != 0 && Ws.pix[(px.linha +i) * Ws.w + (px.coluna + j)] == 0) {
+                    Pixel mv = (Pixel) {i + px.linha, j + px.coluna, px.rotulo};
+                    Ws.pix[j + i * Ws.w] = px.rotulo; // v.rotulo = Pix.rotulo
+                    enfileira_fh(&fh, mv, grad->pix[j + i * Ws.w]);
+                }
+            }
+        }
+    }
+
+//     para cada Marcador m ∈ marcadores {
+// 12. Enfileira(FH, m, G[m.linha][m.coluna]);
+// 13. }
+// 14. enquanto não Vazia(FH) {
+// 15. Marcador Pix = Desenfileira(FH);
+// 16. Ws[Pix.linha][Pix.coluna] = Pix.rotulo
+
+// 17. para cada Pixel v ∈ vizinhos(Pix){
+// 18. se v.rotulo == 0 
+// 19. mv = NovoMarcador(v.linha, v.coluna, Pix.rotulo); 
+// 20. 
+// 21. Enfileira(FH, mv, G[v.linha][v.coluna]);
+// 22. }
+// 23. }
+// 24. }
+// 25. retorne Ws;
+
+
+
+    return Ws;
+}
+
 int main(int argc, char *argv[]){
     const char* NimgO = "img01.ppm"; // imagem original
     
     const char* NimgR = "img01INV.ppm"; //// imagem resultado
     const char *NimgGray = "img01Gray.pgm";
-    const char *NimgGDil = "img01Dilatacao.pgm";
-    const char *NimgGEro = "img01Erosao.pgm";
     const char *NimgGrad = "img01Grad.pgm";
     const char *fmkr = "ColorMarkers.txt";
     const char *Nimgmkr = "imgColorMarkers.ppm";
+    const char *WsImage = "imgWS.pgm";
 
     int tm;
-    //TPmarker *M;
     int *M;
 
     M = ReadMarkers(fmkr,&tm);
@@ -479,27 +565,26 @@ int main(int argc, char *argv[]){
     }
 
 
-    TPpgm imgO, inv, dil, ero, imgG, grad, imgMK;
+    TPpgm imgO, inv, dil, ero, imgG, grad, imgMK, imgWS;
 
 
     ReadPGM(NimgO, &imgO);
 
-   // imgInv(&imgO, &inv);
-   // WritePGM(NimgR, &inv);
-
     RGB2Gray(&imgO, &imgG);
-   // WritePGM(NimgGray, &imgG);
+
     ViewColorMarkers(&imgG, &imgMK, M, tm);
+
     WritePGM(Nimgmkr, &imgMK);
 
- ///  morphdil(&imgG, &dil);
-    ///WritePGM(NimgGDil, &dil);
-
-  ///  morphero(&imgG, &ero);
-  ///  WritePGM(NimgGEro, &ero);
 
     morphgrad(&imgG, &grad);
+    
     WritePGM(NimgGrad, &grad);
+    
+    
+    imgWS = Watershed(&grad, &imgG, M, tm); /// aplica o algoritmo de Watershed
+    
+    WritePGM(WsImage, &imgWS);
 
     /// exemplo para usar RegionColorMarkers
     TPpgm mkr, gmkr; /// mkr - imagem dos marcadores   gmkr - imagem do grad. dos marcadores
